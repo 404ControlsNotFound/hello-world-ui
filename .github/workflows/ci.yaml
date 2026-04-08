@@ -41,14 +41,21 @@ jobs:
             -t "${IMAGE_NAME}:${IMAGE_TAG}" \
             .
 
-      - name: Image scan
-        uses: aquasecurity/trivy-action@v0.34.0
+      - name: Install Trivy
+        uses: aquasecurity/setup-trivy@v0.2.4
         with:
-          image-ref: ${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}
-          format: table
-          severity: HIGH,CRITICAL
-          ignore-unfixed: true
-          exit-code: "1"
+          version: v0.69.1
+          cache: true
+
+      - name: Image scan
+        run: |
+          trivy image --debug \
+            --format table \
+            --severity HIGH,CRITICAL \
+            --ignore-unfixed \
+            --vuln-type os,library \
+            --exit-code 1 \
+            "${IMAGE_NAME}:${IMAGE_TAG}"
 
       - name: Log in to GHCR
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
