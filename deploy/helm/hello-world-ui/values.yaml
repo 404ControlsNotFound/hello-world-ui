@@ -4,7 +4,7 @@ nameOverride: ""
 fullnameOverride: ""
 
 image:
-  repository: ghcr.io//hello-world-ui
+  repository: ghcr.io/404controlsnotfound/hello-world-ui
   tag: "latest"
   pullPolicy: IfNotPresent
 
@@ -69,4 +69,3 @@ readinessProbe:
   path: /
   initialDelaySeconds: 3
   periodSeconds: 10
-

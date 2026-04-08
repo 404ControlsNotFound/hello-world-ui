@@ -12,9 +12,6 @@ permissions:
   contents: read
   packages: write
 
-env:
-  IMAGE_NAME: ghcr.io/${{ github.repository_owner }}/hello-world-ui
-
 jobs:
   scan-build-and-promote:
     runs-on: ubuntu-latest
@@ -25,6 +22,10 @@ jobs:
 
       - name: Set image tag
         run: echo "IMAGE_TAG=${GITHUB_SHA}" >> "${GITHUB_ENV}"
+
+      - name: Set image repository
+        run: |
+          echo "IMAGE_NAME=$(echo "ghcr.io/${GITHUB_REPOSITORY_OWNER}/hello-world-ui" | tr '[:upper:]' '[:lower:]')" >> "${GITHUB_ENV}"
 
       - name: Source code scan
         run: |
@@ -43,7 +44,7 @@ jobs:
       - name: Image scan
         uses: aquasecurity/trivy-action@v0.34.0
         with:
-          image-ref: ghcr.io/${{ github.repository_owner }}/hello-world-ui:${{ github.sha }}
+          image-ref: ${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}
           format: table
           severity: HIGH,CRITICAL
           ignore-unfixed: true
