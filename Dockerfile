@@ -17,7 +17,14 @@ LABEL org.opencontainers.image.title="hello-world-ui"
 LABEL org.opencontainers.image.description="Static UI for an Argo CD GitOps demo"
 LABEL org.opencontainers.image.source="https://github.com/404ControlsNotFound/hello-world-ui"
 
+USER root
+
+# Pull in fixed Alpine packages so the image scan gate does not ship known HIGH findings.
+RUN apk upgrade --no-cache
+
 COPY nginx/default.conf /etc/nginx/conf.d/default.conf
 COPY --from=build /workspace/dist/ /usr/share/nginx/html/
+
+USER 101
 
 EXPOSE 8080
