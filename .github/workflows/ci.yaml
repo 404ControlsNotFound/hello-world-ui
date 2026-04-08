@@ -40,22 +40,19 @@ jobs:
             --build-arg APP_VERSION="${IMAGE_TAG}" \
             -t "${IMAGE_NAME}:${IMAGE_TAG}" \
             .
-
-      - name: Install Trivy
-        uses: aquasecurity/setup-trivy@e6c2c5e321ed9123bda567646e2f96565e34abe1
-        with:
-          version: v0.69.1
-          cache: true
+          docker save "${IMAGE_NAME}:${IMAGE_TAG}" -o hello-world-ui-image.tar
 
       - name: Image scan
         run: |
-          trivy image --debug \
+          docker run --rm \
+            -v "${PWD}:/work" \
+            aquasec/trivy:0.69.1 image \
+            --input /work/hello-world-ui-image.tar \
             --format table \
             --severity HIGH,CRITICAL \
             --ignore-unfixed \
             --vuln-type os,library \
-            --exit-code 1 \
-            "${IMAGE_NAME}:${IMAGE_TAG}"
+            --exit-code 1
 
       - name: Log in to GHCR
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
