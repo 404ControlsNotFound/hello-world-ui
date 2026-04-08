@@ -1,0 +1,102 @@
+name: ci
+
+on:
+  pull_request:
+    branches:
+      - main
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+  packages: write
+
+env:
+  IMAGE_NAME: ghcr.io/${{ github.repository_owner }}/hello-world-ui
+
+jobs:
+  scan-build-and-promote:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+
+      - name: Set image tag
+        run: echo "IMAGE_TAG=${GITHUB_SHA}" >> "${GITHUB_ENV}"
+
+      - name: Source code scan
+        run: |
+          docker run --rm \
+            -v "${PWD}:/src" \
+            returntocorp/semgrep:latest \
+            semgrep scan --config auto --error /src
+
+      - name: Filesystem scan
+        uses: aquasecurity/trivy-action@0.28.0
+        with:
+          scan-type: fs
+          scan-ref: .
+          severity: HIGH,CRITICAL
+          ignore-unfixed: true
+          exit-code: "1"
+
+      - name: Build image
+        run: |
+          docker build \
+            --build-arg APP_VERSION="${IMAGE_TAG}" \
+            -t "${IMAGE_NAME}:${IMAGE_TAG}" \
+            .
+
+      - name: Image scan
+        uses: aquasecurity/trivy-action@0.28.0
+        with:
+          image-ref: ghcr.io/${{ github.repository_owner }}/hello-world-ui:${{ github.sha }}
+          severity: HIGH,CRITICAL
+          ignore-unfixed: true
+          exit-code: "1"
+
+      - name: Log in to GHCR
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Push image tags
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        run: |
+          docker push "${IMAGE_NAME}:${IMAGE_TAG}"
+          docker tag "${IMAGE_NAME}:${IMAGE_TAG}" "${IMAGE_NAME}:latest"
+          docker push "${IMAGE_NAME}:latest"
+
+      - name: Promote image tag in gitops-infra
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        env:
+          GITOPS_REPO: ${{ vars.GITOPS_REPO }}
+          GITOPS_VALUES_FILE: ${{ vars.GITOPS_VALUES_FILE }}
+          GITOPS_REPO_TOKEN: ${{ secrets.GITOPS_REPO_TOKEN }}
+        run: |
+          if [ -z "${GITOPS_REPO}" ] || [ -z "${GITOPS_VALUES_FILE}" ] || [ -z "${GITOPS_REPO_TOKEN}" ]; then
+            echo "GitOps promotion is not configured; skipping."
+            exit 0
+          fi
+
+          git clone "https://x-access-token:${GITOPS_REPO_TOKEN}@github.com/${GITOPS_REPO}.git" gitops-infra
+          cd gitops-infra
+
+          sed -i "s|tag: .*|tag: \"${IMAGE_TAG}\"|" "${GITOPS_VALUES_FILE}"
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          if git diff --quiet; then
+            echo "No GitOps change detected."
+            exit 0
+          fi
+
+          git add "${GITOPS_VALUES_FILE}"
+          git commit -m "chore: promote hello-world-ui image ${IMAGE_TAG}"
+          git push origin HEAD:main
