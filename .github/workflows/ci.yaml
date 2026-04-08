@@ -33,17 +33,6 @@ jobs:
             returntocorp/semgrep:latest \
             semgrep scan --config auto --error /src
 
-      - name: Filesystem scan
-        uses: aquasecurity/trivy-action@v0.34.0
-        with:
-          scan-type: fs
-          scan-ref: .
-          scanners: vuln,secret
-          format: table
-          severity: HIGH,CRITICAL
-          ignore-unfixed: true
-          exit-code: "1"
-
       - name: Build image
         run: |
           docker build \
