@@ -8,6 +8,14 @@ image:
   tag: "latest"
   pullPolicy: IfNotPresent
 
+rollout:
+  enabled: false
+  revisionHistoryLimit: 2
+  autoPromotionEnabled: true
+  autoPromotionSeconds: 30
+  previewReplicaCount: 1
+  scaleDownDelaySeconds: 30
+
 serviceAccount:
   create: true
   automount: false
@@ -47,10 +55,20 @@ ingress:
         - path: /
           pathType: Prefix
   tls: []
+  preview:
+    enabled: false
+    annotations: {}
+    hosts:
+      - host: preview-hello-world.localtest.me
+        paths:
+          - path: /
+            pathType: Prefix
+    tls: []
 
 networkPolicy:
   enabled: true
   ingressNamespace: ingress-nginx
+  denyAllEgress: true
 
 resources:
   requests:

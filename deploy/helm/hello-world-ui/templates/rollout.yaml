@@ -1,6 +1,6 @@
-{{- if not .Values.rollout.enabled -}}
-apiVersion: apps/v1
-kind: Deployment
+{{- if .Values.rollout.enabled -}}
+apiVersion: argoproj.io/v1alpha1
+kind: Rollout
 metadata:
   name: {{ include "hello-world-ui.fullname" . }}
   labels:
@@ -11,6 +11,14 @@ spec:
   selector:
     matchLabels:
       {{- include "hello-world-ui.selectorLabels" . | nindent 6 }}
+  strategy:
+    blueGreen:
+      activeService: {{ include "hello-world-ui.activeServiceName" . }}
+      previewService: {{ include "hello-world-ui.previewServiceName" . }}
+      autoPromotionEnabled: {{ .Values.rollout.autoPromotionEnabled }}
+      autoPromotionSeconds: {{ .Values.rollout.autoPromotionSeconds }}
+      previewReplicaCount: {{ .Values.rollout.previewReplicaCount }}
+      scaleDownDelaySeconds: {{ .Values.rollout.scaleDownDelaySeconds }}
   template:
     metadata:
       labels:

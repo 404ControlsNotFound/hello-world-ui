@@ -21,7 +21,7 @@ spec:
             pathType: {{ .pathType }}
             backend:
               service:
-                name: {{ include "hello-world-ui.fullname" $ }}
+                name: {{ include "hello-world-ui.activeServiceName" $ }}
                 port:
                   number: {{ $.Values.service.port }}
           {{- end }}
@@ -31,4 +31,37 @@ spec:
     {{- toYaml . | nindent 4 }}
   {{- end }}
 {{- end }}
-
+{{- if and .Values.rollout.enabled .Values.ingress.preview.enabled }}
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ include "hello-world-ui.fullname" . }}-preview
+  labels:
+    {{- include "hello-world-ui.labels" . | nindent 4 }}
+  {{- with .Values.ingress.preview.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  ingressClassName: {{ .Values.ingress.className }}
+  rules:
+    {{- range .Values.ingress.preview.hosts }}
+    - host: {{ .host | quote }}
+      http:
+        paths:
+          {{- range .paths }}
+          - path: {{ .path }}
+            pathType: {{ .pathType }}
+            backend:
+              service:
+                name: {{ include "hello-world-ui.previewServiceName" $ }}
+                port:
+                  number: {{ $.Values.service.port }}
+          {{- end }}
+    {{- end }}
+  {{- with .Values.ingress.preview.tls }}
+  tls:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+{{- end }}

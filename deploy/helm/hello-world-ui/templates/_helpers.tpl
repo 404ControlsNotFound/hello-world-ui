@@ -40,3 +40,14 @@ app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end -}}
 {{- end -}}
 
+{{- define "hello-world-ui.activeServiceName" -}}
+{{- if .Values.rollout.enabled -}}
+{{- printf "%s-active" (include "hello-world-ui.fullname" .) -}}
+{{- else -}}
+{{- include "hello-world-ui.fullname" . -}}
+{{- end -}}
+{{- end -}}
+
+{{- define "hello-world-ui.previewServiceName" -}}
+{{- printf "%s-preview" (include "hello-world-ui.fullname" .) -}}
+{{- end -}}
