@@ -1,60 +1,74 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Hello World UI</title>
-    <meta
-      name="description"
-      content="A minimal GitOps demo application deployed with Argo CD, Helm, and Kustomize."
-    />
-    <link rel="stylesheet" href="./styles.css" />
-  </head>
-  <body>
-    <main class="shell">
-      <section class="hero">
-        <p class="eyebrow">GitOps Demo</p>
-        <h1>Hello World</h1>
-        <p class="lede">
-          This UI is deployed to Kubernetes by Argo CD from declarative Git
-          state.
-        </p>
-      </section>
 
-      <section class="card-grid">
-        <article class="card">
-          <h2>Deployment Model</h2>
-          <p>Application source, image build, and deployment state are separated.</p>
-        </article>
-        <article class="card">
-          <h2>Platform Tooling</h2>
-          <p>Helm packages the app. Kustomize composes Argo CD and cluster overlays.</p>
-        </article>
-        <article class="card">
-          <h2>Operational Goal</h2>
-          <p>Everything in-cluster is derived from Git, with only a small bootstrap step.</p>
-        </article>
-      </section>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Hello World UI</title>
+  <meta name="description" content="A minimal GitOps demo application deployed with Argo CD, Helm, and Kustomize." />
+  <link rel="stylesheet" href="./styles.css" />
+</head>
 
-      <section class="meta">
-        <dl>
-          <div>
-            <dt>Environment</dt>
-            <dd id="environment">local-kind</dd>
-          </div>
-          <div>
-            <dt>Version</dt>
-            <dd id="version">__APP_VERSION__</dd>
-          </div>
-          <div>
-            <dt>Status</dt>
-            <dd id="status">Healthy</dd>
-          </div>
-        </dl>
-      </section>
-    </main>
+<body>
+  <main class="shell">
+    <section class="hero">
+      <p class="eyebrow">GitOps Demo</p>
+      <h1>Hello World</h1>
+      <p class="lede">
+        This UI is deployed to Kubernetes by Argo CD from declarative Git
+        state.
+      </p>
+    </section>
 
-    <script src="./app.js"></script>
-  </body>
+    <section class="card-grid">
+      <article class="card">
+        <h2>Deployment Model</h2>
+        <p>Application source, image build, and deployment state are separated.</p>
+      </article>
+      <article class="card">
+        <h2>Platform Tooling</h2>
+        <p>Helm packages the app. Kustomize composes Argo CD and cluster overlays.</p>
+      </article>
+      <article class="card">
+        <h2>Operational Goal</h2>
+        <p>Everything in-cluster is derived from Git, with only a small bootstrap step.</p>
+      </article>
+    </section>
+
+    <section class="meta">
+      <dl>
+        <div>
+          <dt>Environment</dt>
+          <dd id="environment">local-kind</dd>
+        </div>
+        <div>
+          <dt>Version</dt>
+          <dd id="version">__APP_VERSION__</dd>
+        </div>
+        <div>
+          <dt>Status</dt>
+          <dd id="status">Healthy</dd>
+        </div>
+      </dl>
+    </section>
+
+    <section style="
+    margin-top: 24px;
+    padding: 20px;
+    border-radius: 16px;
+    background: #f6ead8;
+    border: 1px solid #e7d2b3;
+    color: #4a3a2a;
+    box-shadow: 0 10px 24px rgba(120, 92, 56, 0.08);
+  ">
+      <h2 style="margin: 0 0 8px; font-size: 1.25rem;">This is a modification</h2>
+      <p style="margin: 0; line-height: 1.6;">
+        This container was added to demonstrate an application change flowing through the GitOps CI/CD pipeline.
+      </p>
+    </section>
+  </main>
+
+  <script src="./app.js"></script>
+</body>
+
 </html>
-
